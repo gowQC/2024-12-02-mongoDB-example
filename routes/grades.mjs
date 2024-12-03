@@ -54,26 +54,35 @@ router
 
 // The show route is READ, but limiting to a specific entry
 // in this case, we'll use id to get a specific grades entry
-router.route("/:id").get(async (req, res) => {
-  // in the connection, remember that we have already accessed the sample training db
-  // now we are going to access the 'grades' collection in that db
-  const collection = await db.collection("grades");
+router
+  .route("/:id")
+  .get(async (req, res) => {
+    // in the connection, remember that we have already accessed the sample training db
+    // now we are going to access the 'grades' collection in that db
+    const collection = await db.collection("grades");
 
-  // define the query
-  // in this, we are searching for a specific id
-  try {
-    const query = { _id: new ObjectId(req.params.id) };
-    const result = await collection.findOne(query);
+    // define the query
+    // in this, we are searching for a specific id
+    try {
+      const query = { _id: new ObjectId(req.params.id) };
+      const result = await collection.findOne(query);
 
-    if (!result) {
-      res.send("Resource not found").status(404);
-    } else {
-      res.send(result).status(200);
+      if (!result) {
+        res.send("Resource not found").status(404);
+      } else {
+        res.send(result).status(200);
+      }
+    } catch (err) {
+      res.send(`${req.params.id} is not an active ID`).status(400);
     }
-  } catch (err) {
-    res.send(`${req.params.id} is not an active ID`).status(400);
-  }
-});
+  })
+  .delete(async (req, res) => {
+    const collection = db.collection("grades");
+    const query = { _id: new ObjectId(req.params.id) };
+    const results = await collection.deleteOne(query);
+    if (!results) res.send("not found").status(404);
+    else res.send(results).status(200);
+  });
 
 router.route("/student/:student_id").get(async (req, res) => {
   const collection = await db.collection("grades");
